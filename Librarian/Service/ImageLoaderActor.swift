@@ -12,6 +12,14 @@ actor ImageLoaderActor: ImageLoaderActing {
         guard let url = URL(string: urlString) else {
             return nil
         }
+
+        if let dict = UserDefaults.standard.object(forKey: Constants.Keys.imageCache) as? [String:String],
+           let path = dict[urlString],
+           let data = try? Data(contentsOf: URL(fileURLWithPath: path))
+        {
+            return UIImage(data: data)
+        }
+              
         let request = URLRequest(url: url)
         
         let task: Task<UIImage, Error> = Task {
@@ -38,7 +46,7 @@ private extension ImageLoaderActor {
         if dict == nil {
             dict = [String: String]()
         }
-        
+        print("Saving with:\(path)")
         dict![urlString] = path
         UserDefaults.standard.setValue(dict, forKey: Constants.Keys.imageCache)
     }
